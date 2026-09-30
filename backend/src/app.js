@@ -9,6 +9,7 @@ import workflowRoutes from './routes/workflows.js';
 import taskRoutes from './routes/tasks.js';
 import approvalRoutes from './routes/approvals.js';
 import aiRoutes from './routes/ai.js';
+import googleIntegrationRoutes from './routes/integrationsGoogle.js';
 import { notFoundHandler } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -51,6 +52,9 @@ app.use('/api/workflows', workflowRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/approvals', approvalRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/integrations/google', googleIntegrationRoutes);
+// Alias for legacy /api/auth/google/callback support
+app.use('/api/auth/google', googleIntegrationRoutes);
 
 // 404 Handler
 app.use(notFoundHandler);

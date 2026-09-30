@@ -7,3 +7,5 @@ export const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, 
     autoRefreshToken: false,
   },
 });
+
+export const supabaseAdmin = supabase;

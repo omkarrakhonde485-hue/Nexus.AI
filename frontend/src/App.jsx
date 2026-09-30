@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import AiPage from './pages/AiPage';
+import IntegrationsPage from './pages/IntegrationsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function NavigationBar() {
@@ -17,6 +18,7 @@ function NavigationBar() {
         <Link to="/" style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 'bold', fontSize: '1.1rem' }}>NEXUS AI</Link>
         <Link to="/" style={{ color: '#94a3b8', textDecoration: 'none' }}>Home</Link>
         {session && <Link to="/ai" style={{ color: '#38bdf8', textDecoration: 'none' }}>Ask AI</Link>}
+        {session && <Link to="/integrations" style={{ color: '#94a3b8', textDecoration: 'none' }}>Integrations</Link>}
         {session && <Link to="/dashboard" style={{ color: '#94a3b8', textDecoration: 'none' }}>Dashboard</Link>}
       </div>
 
@@ -59,6 +61,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <AiPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/integrations"
+            element={
+              <ProtectedRoute>
+                <IntegrationsPage />
               </ProtectedRoute>
             }
           />
