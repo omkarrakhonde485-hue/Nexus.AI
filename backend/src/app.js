@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './config/env.js';
 import healthRoutes from './routes/health.js';
+import authRoutes from './routes/auth.js';
+import profileRoutes from './routes/profile.js';
 import { notFoundHandler } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -39,6 +41,8 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api/health', healthRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes);
 
 // 404 Handler
 app.use(notFoundHandler);
