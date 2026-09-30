@@ -35,7 +35,7 @@ const DEMO_USERS = [
   {
     fullName: 'Vikram Singh',
     email: 'vikram@nexusai.internal',
-    role: 'it',
+    role: 'it_support',
     department: 'IT',
   },
   {

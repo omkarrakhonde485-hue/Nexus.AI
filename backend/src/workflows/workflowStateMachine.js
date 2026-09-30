@@ -1,0 +1,97 @@
+// backend/src/workflows/workflowStateMachine.js
+// Enforces valid state transitions and terminal states for the workflow lifecycle
+
+export const WORKFLOW_STATES = {
+  DRAFT: 'draft',
+  SUBMITTED: 'submitted',
+  AI_ANALYZING: 'ai_analyzing',
+  NEEDS_INFORMATION: 'needs_information',
+  AWAITING_APPROVAL: 'awaiting_approval',
+  APPROVED: 'approved',
+  PROCESSING: 'processing',
+  BLOCKED: 'blocked',
+  ESCALATED: 'escalated',
+  COMPLETED: 'completed',
+  REJECTED: 'rejected',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled',
+};
+
+export const TERMINAL_STATES = [
+  WORKFLOW_STATES.COMPLETED,
+  WORKFLOW_STATES.REJECTED,
+  WORKFLOW_STATES.FAILED,
+  WORKFLOW_STATES.CANCELLED,
+];
+
+export const VALID_TRANSITIONS = {
+  [WORKFLOW_STATES.DRAFT]: [
+    WORKFLOW_STATES.SUBMITTED,
+    WORKFLOW_STATES.CANCELLED,
+  ],
+
+  [WORKFLOW_STATES.SUBMITTED]: [
+    WORKFLOW_STATES.AI_ANALYZING,
+    WORKFLOW_STATES.AWAITING_APPROVAL,
+    WORKFLOW_STATES.PROCESSING,
+    WORKFLOW_STATES.CANCELLED,
+  ],
+
+  [WORKFLOW_STATES.AI_ANALYZING]: [
+    WORKFLOW_STATES.NEEDS_INFORMATION,
+    WORKFLOW_STATES.AWAITING_APPROVAL,
+    WORKFLOW_STATES.PROCESSING,
+    WORKFLOW_STATES.CANCELLED,
+  ],
+
+  [WORKFLOW_STATES.NEEDS_INFORMATION]: [
+    WORKFLOW_STATES.AI_ANALYZING,
+    WORKFLOW_STATES.SUBMITTED,
+    WORKFLOW_STATES.CANCELLED,
+  ],
+
+  [WORKFLOW_STATES.AWAITING_APPROVAL]: [
+    WORKFLOW_STATES.APPROVED,
+    WORKFLOW_STATES.REJECTED,
+    WORKFLOW_STATES.CANCELLED,
+  ],
+
+  [WORKFLOW_STATES.APPROVED]: [
+    WORKFLOW_STATES.PROCESSING,
+    WORKFLOW_STATES.COMPLETED,
+  ],
+
+  [WORKFLOW_STATES.PROCESSING]: [
+    WORKFLOW_STATES.COMPLETED,
+    WORKFLOW_STATES.BLOCKED,
+    WORKFLOW_STATES.ESCALATED,
+    WORKFLOW_STATES.FAILED,
+    WORKFLOW_STATES.CANCELLED,
+  ],
+
+  [WORKFLOW_STATES.BLOCKED]: [
+    WORKFLOW_STATES.PROCESSING,
+    WORKFLOW_STATES.CANCELLED,
+  ],
+
+  [WORKFLOW_STATES.ESCALATED]: [
+    WORKFLOW_STATES.PROCESSING,
+    WORKFLOW_STATES.CANCELLED,
+  ],
+
+  // Terminal states have no outward transitions
+  [WORKFLOW_STATES.COMPLETED]: [],
+  [WORKFLOW_STATES.REJECTED]: [],
+  [WORKFLOW_STATES.FAILED]: [],
+  [WORKFLOW_STATES.CANCELLED]: [],
+};
+
+export const isValidTransition = (currentState, targetState) => {
+  if (currentState === targetState) return true;
+  const allowed = VALID_TRANSITIONS[currentState] || [];
+  return allowed.includes(targetState);
+};
+
+export const isTerminalState = (state) => {
+  return TERMINAL_STATES.includes(state);
+};
