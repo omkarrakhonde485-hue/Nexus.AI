@@ -8,6 +8,7 @@ import profileRoutes from './routes/profile.js';
 import workflowRoutes from './routes/workflows.js';
 import taskRoutes from './routes/tasks.js';
 import approvalRoutes from './routes/approvals.js';
+import aiRoutes from './routes/ai.js';
 import { notFoundHandler } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -49,6 +50,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/workflows', workflowRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/approvals', approvalRoutes);
+app.use('/api/ai', aiRoutes);
 
 // 404 Handler
 app.use(notFoundHandler);

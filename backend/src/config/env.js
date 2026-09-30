@@ -19,8 +19,9 @@ const envSchema = z.object({
   SUPABASE_URL: z.string().min(1),
   SUPABASE_SECRET_KEY: z.string().min(1),
 
-  // Recognized for future blocks (optional for now)
+  // Gemini AI configuration
   GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default('gemini-3.5-flash-lite'),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   GOOGLE_REDIRECT_URI: z.string().optional(),

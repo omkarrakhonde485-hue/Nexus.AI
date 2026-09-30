@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import AiPage from './pages/AiPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function NavigationBar() {
@@ -15,6 +16,7 @@ function NavigationBar() {
       <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
         <Link to="/" style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 'bold', fontSize: '1.1rem' }}>NEXUS AI</Link>
         <Link to="/" style={{ color: '#94a3b8', textDecoration: 'none' }}>Home</Link>
+        {session && <Link to="/ai" style={{ color: '#38bdf8', textDecoration: 'none' }}>Ask AI</Link>}
         {session && <Link to="/dashboard" style={{ color: '#94a3b8', textDecoration: 'none' }}>Dashboard</Link>}
       </div>
 
@@ -52,6 +54,14 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/ai"
+            element={
+              <ProtectedRoute>
+                <AiPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={

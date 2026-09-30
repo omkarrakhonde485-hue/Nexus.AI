@@ -42,3 +42,37 @@ export const canApproveWorkflow = (user, workflow, requester) => {
 
   return false;
 };
+
+export const canReadWorkflow = (user, workflow, requester) => {
+  if (!user || !workflow) return false;
+  if (user.role === 'admin') return true;
+
+  // Creator can read
+  if (workflow.created_by === user.id) return true;
+
+  // Current assignee can read
+  if (workflow.current_assignee_id === user.id) return true;
+
+  // Manager of requester can read
+  const managerId = requester?.manager_id || requester?.managerId;
+  if (user.role === 'manager' && managerId === user.id) return true;
+
+  // Department roles can read department-relevant workflows
+  const wfType = workflow.workflow_type;
+  if (user.role === 'finance' && (wfType === 'expense' || wfType === 'invoice')) return true;
+  if (user.role === 'hr' && wfType === 'onboarding') return true;
+  if (user.role === 'it_support' && wfType === 'helpdesk') return true;
+  if (user.role === 'procurement' && wfType === 'procurement') return true;
+
+  return false;
+};
+
+export const canManageTask = (user, task) => {
+  if (!user || !task) return false;
+  if (user.role === 'admin') return true;
+  if (task.assignee_id === user.id) return true;
+  if (task.created_by === user.id) return true;
+  if (task.assignee_role && task.assignee_role === user.role) return true;
+  if (user.role === 'manager') return true;
+  return false;
+};

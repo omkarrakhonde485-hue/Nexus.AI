@@ -58,8 +58,10 @@ router.get('/ai', (req, res) => {
     success: true,
     data: {
       provider: 'google-gemini',
-      configured: isConfigured
-    }
+      configured: isConfigured,
+      model: env.GEMINI_MODEL || 'gemini-3.5-flash',
+      toolCalling: true,
+    },
   });
 });
 
