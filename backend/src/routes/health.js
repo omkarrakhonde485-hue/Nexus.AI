@@ -30,7 +30,7 @@ router.get('/database', async (req, res) => {
     }
 
     const { error } = await supabase.from('_dummy_ping').select('count').limit(1);
-    if (error && error.code !== 'PGRST204' && error.code !== '42P01') {
+    if (error && error.code !== 'PGRST204' && error.code !== 'PGRST205' && error.code !== '42P01') {
       throw error;
     }
 
