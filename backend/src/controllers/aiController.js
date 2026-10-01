@@ -6,7 +6,7 @@ import { aiAuditService } from '../services/aiAuditService.js';
 
 export async function handleAgentTurn(req, res, next) {
   try {
-    const { message, workflowId = null, context = {} } = req.body;
+    const { message, workflowId = null, context = {}, pendingActionId = null } = req.body;
 
     if (!message || typeof message !== 'string' || message.trim() === '') {
       return res.status(400).json({
@@ -20,6 +20,7 @@ export async function handleAgentTurn(req, res, next) {
       message,
       workflowId,
       extraContext: context,
+      pendingActionId,
     });
 
     return res.status(200).json(result);

@@ -3,6 +3,7 @@
 
 import { supabase } from '../config/supabase.js';
 import { workflowRepository } from '../repositories/workflowRepository.js';
+import { getUserCalendarTimezone } from '../integrations/google/googleCalendarService.js';
 
 export async function buildAgentContext({ user, workflowId = null, extraContext = {} }) {
   // 1. Fetch user manager details if present
@@ -16,7 +17,15 @@ export async function buildAgentContext({ user, workflowId = null, extraContext 
     managerName = mgr?.full_name || null;
   }
 
-  // 2. Fetch specific workflow if requested
+  // 2. Resolve user timezone
+  let timeZone = 'Asia/Kolkata';
+  try {
+    timeZone = await getUserCalendarTimezone(user.id);
+  } catch {
+    // fallback
+  }
+
+  // 3. Fetch specific workflow if requested
   let workflowContext = null;
   if (workflowId) {
     const wf = await workflowRepository.findById(workflowId);
@@ -42,6 +51,7 @@ export async function buildAgentContext({ user, workflowId = null, extraContext 
       department: user.department,
       manager_id: user.manager_id,
       managerName,
+      timeZone,
     },
     workflow: workflowContext,
     extra: extraContext,

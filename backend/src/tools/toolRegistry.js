@@ -3,15 +3,16 @@
 
 import { internalTools } from './internalTools.js';
 import { toolSchemas } from './toolSchemas.js';
+import { googleDriveTools } from './googleDriveTools.js';
+import { googleCalendarTools } from './googleCalendarTools.js';
 
-export const TOOL_RISK_LEVELS = {
-  READ_ONLY: 'read_only',
-  INTERNAL_WRITE: 'internal_write',
-  EXTERNAL_WRITE: 'external_write',
-  SENSITIVE_EXTERNAL_WRITE: 'sensitive_external_write',
-};
+import { TOOL_RISK_LEVELS } from './toolConstants.js';
+export { TOOL_RISK_LEVELS };
 
 export const toolRegistry = {
+  ...googleDriveTools,
+  ...googleCalendarTools,
+  
   // Read Only Tools
   get_user_profile: {
     name: 'get_user_profile',

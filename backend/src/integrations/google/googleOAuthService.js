@@ -206,7 +206,7 @@ export async function getConnection(userId) {
 
   const { data, error } = await supabaseAdmin
     .from('google_connections')
-    .select('id, user_id, google_email, scopes, status, expires_at, connected_at, updated_at')
+    .select('id, user_id, google_email, scopes, status, expires_at, connected_at, updated_at, metadata')
     .eq('user_id', userId)
     .single();
 
@@ -216,6 +216,7 @@ export async function getConnection(userId) {
       googleEmail: null,
       status: 'disconnected',
       scopes: [],
+      metadata: {},
     };
   }
 
@@ -226,6 +227,7 @@ export async function getConnection(userId) {
     scopes: data.scopes || [],
     connectedAt: data.connected_at,
     updatedAt: data.updated_at,
+    metadata: data.metadata || {},
   };
 }
 

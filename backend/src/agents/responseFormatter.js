@@ -1,7 +1,15 @@
 // backend/src/agents/responseFormatter.js
-// Standardizes the AI Agent response payload
+// Standardizes the AI Agent response payload with confirmation support
 
-export function formatAgentResponse({ message, executedActions = [], workflowId = null, intent = 'general' }) {
+export function formatAgentResponse({
+  message,
+  executedActions = [],
+  workflowId = null,
+  intent = 'general',
+  requiresConfirmation = false,
+  pendingActionId = null,
+  proposal = null,
+}) {
   // Determine intent from executed actions or text
   let detectedIntent = intent;
   let primaryWorkflowId = workflowId;
@@ -28,7 +36,9 @@ export function formatAgentResponse({ message, executedActions = [], workflowId 
       intent: detectedIntent,
       workflowId: primaryWorkflowId,
       actions: cleanActions,
-      requiresConfirmation: false,
+      requiresConfirmation: Boolean(requiresConfirmation),
+      pendingActionId: pendingActionId || null,
+      proposal: proposal || null,
     },
   };
 }

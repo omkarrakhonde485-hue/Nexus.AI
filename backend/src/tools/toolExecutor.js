@@ -7,9 +7,20 @@ import { aiAuditService } from '../services/aiAuditService.js';
 
 const TOOL_TIMEOUT_MS = 8000;
 
-export async function executeToolCall(toolName, args, userContext) {
+export async function executeToolCall(toolName, args, userContext, executionContext = {}) {
   const startTime = Date.now();
   const tool = toolRegistry[toolName];
+
+  // Tool Discipline Guard: Block Drive tools during pure Calendar requests
+  if (toolName.includes('drive')) {
+    const reqText = (executionContext.currentRequest || '').toLowerCase();
+    const isDriveRequested = /drive|document|folder|doc|file|policy|notes/.test(reqText);
+    const isCalendarRequest = /schedule|meeting|calendar|slot|free|appointment/.test(reqText);
+    if (isCalendarRequest && !isDriveRequested) {
+      const errorMsg = 'Tool discipline violation: Drive tools are not permitted during calendar requests unless the user explicitly requested Drive documents or files.';
+      return { success: false, error: errorMsg, code: 'TOOL_DISCIPLINE_BLOCKED' };
+    }
+  }
 
   // 1. Tool Existence Check
   if (!tool) {

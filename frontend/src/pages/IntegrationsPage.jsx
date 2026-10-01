@@ -9,9 +9,11 @@ export default function IntegrationsPage() {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [googleStatus, setGoogleStatus] = useState(null);
+  const [driveWorkspace, setDriveWorkspace] = useState(null);
   const [testResult, setTestResult] = useState(null);
   const [testing, setTesting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
+  const [initializingDrive, setInitializingDrive] = useState(false);
   const [alertMessage, setAlertMessage] = useState(null);
 
   // Check URL query parameters for OAuth callback results
@@ -39,11 +41,32 @@ export default function IntegrationsPage() {
       const data = await res.json();
       if (data.success) {
         setGoogleStatus(data.data);
+        if (data.data.connected) {
+          fetchDriveWorkspace();
+        } else {
+          setDriveWorkspace(null);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch Google status:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDriveWorkspace = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/integrations/google/drive/workspace`, {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDriveWorkspace(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch Drive workspace status:', err);
     }
   };
 
@@ -108,12 +131,45 @@ export default function IntegrationsPage() {
       if (data.success) {
         setAlertMessage({ type: 'info', text: 'Google Workspace disconnected.' });
         setTestResult(null);
+        setDriveWorkspace(null);
         fetchStatus();
       }
     } catch (err) {
       console.error('Disconnect error:', err);
     } finally {
       setDisconnecting(false);
+    }
+  };
+
+  const handleInitializeWorkspace = async () => {
+    if (!session?.access_token) return;
+    try {
+      setInitializingDrive(true);
+      const res = await fetch(`${API_BASE_URL}/api/integrations/google/drive/workspace`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAlertMessage({ type: 'success', text: 'NEXUS Workspace verified and synced with real Google Drive!' });
+        setDriveWorkspace({
+          success: true,
+          workspaceCreated: true,
+          folderId: data.folderId,
+          webViewLink: data.webViewLink || `https://drive.google.com/drive/folders/${data.folderId}`,
+        });
+        fetchDriveWorkspace();
+      } else {
+        const errorMsg = data.error?.message || (typeof data.error === 'string' ? data.error : 'Failed to initialize workspace.');
+        setAlertMessage({ type: 'error', text: `Failed to initialize workspace: ${errorMsg}` });
+      }
+    } catch (err) {
+      console.error('Init workspace error:', err);
+      setAlertMessage({ type: 'error', text: 'Error initializing workspace: ' + err.message });
+    } finally {
+      setInitializingDrive(false);
     }
   };
 
@@ -158,6 +214,7 @@ export default function IntegrationsPage() {
           border: '1px solid #334155',
           borderRadius: '8px',
           padding: '1.5rem',
+          marginBottom: '1.5rem',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -302,6 +359,165 @@ export default function IntegrationsPage() {
           </div>
         )}
       </div>
+
+      {/* Drive Workspace Card */}
+      {googleStatus?.connected && (
+        <div
+          style={{
+            background: '#1e293b',
+            border: '1px solid #334155',
+            borderRadius: '8px',
+            padding: '1.5rem',
+            marginBottom: '1.5rem',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <div>
+              <h2 style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#f1f5f9', margin: 0 }}>
+                NEXUS Drive Workspace
+              </h2>
+              <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: '0.25rem 0 0 0' }}>
+                App-managed folder structure for AI-generated documents and files.
+              </p>
+            </div>
+            <div>
+              {driveWorkspace?.workspaceCreated ? (
+                <span
+                  style={{
+                    background: '#065f46',
+                    color: '#34d399',
+                    padding: '0.3rem 0.75rem',
+                    borderRadius: '9999px',
+                    fontSize: '0.85rem',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  ✓ Created
+                </span>
+              ) : (
+                <span
+                  style={{
+                    background: '#334155',
+                    color: '#94a3b8',
+                    padding: '0.3rem 0.75rem',
+                    borderRadius: '9999px',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  Not Created
+                </span>
+              )}
+            </div>
+          </div>
+          <div>
+            {!driveWorkspace?.workspaceCreated ? (
+              <button
+                onClick={handleInitializeWorkspace}
+                disabled={initializingDrive}
+                style={{
+                  padding: '0.5rem 1rem',
+                  background: '#0284c7',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '0.9rem',
+                }}
+              >
+                {initializingDrive ? 'Initializing Real Drive Workspace...' : 'Initialize Workspace'}
+              </button>
+            ) : (
+              <div>
+                <div style={{ background: '#0f172a', padding: '0.75rem 1rem', borderRadius: '6px', marginBottom: '1rem', border: '1px solid #334155', fontSize: '0.85rem' }}>
+                  <div style={{ color: '#38bdf8', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                    Google Drive Workspace Active:
+                  </div>
+                  <div style={{ color: '#cbd5e1', marginBottom: '0.5rem' }}>
+                    Folder ID: <code style={{ color: '#f59e0b', background: '#1e293b', padding: '0.1rem 0.4rem', borderRadius: '3px' }}>{driveWorkspace.folderId}</code>
+                  </div>
+                  <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>
+                    Created subfolders: <span style={{ color: '#4ade80' }}>Policies</span> • <span style={{ color: '#4ade80' }}>Reports</span> • <span style={{ color: '#4ade80' }}>Expenses</span> • <span style={{ color: '#4ade80' }}>Onboarding</span> • <span style={{ color: '#4ade80' }}>Meeting Reports</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => window.open(driveWorkspace.webViewLink || `https://drive.google.com/drive/folders/${driveWorkspace.folderId}`, '_blank')}
+                  style={{
+                    padding: '0.6rem 1.2rem',
+                    background: '#059669',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    fontSize: '0.9rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                  }}
+                >
+                  Open NEXUS Drive (Google Drive) ↗
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Calendar Workspace Card */}
+      {googleStatus?.connected && (
+        <div
+          style={{
+            background: '#1e293b',
+            border: '1px solid #334155',
+            borderRadius: '8px',
+            padding: '1.5rem',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <div>
+              <h2 style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#f1f5f9', margin: 0 }}>
+                NEXUS Google Calendar
+              </h2>
+              <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: '0.25rem 0 0 0' }}>
+                Event scheduling and calendar availability checking.
+              </p>
+            </div>
+            <div>
+              <span
+                style={{
+                  background: '#065f46',
+                  color: '#34d399',
+                  padding: '0.3rem 0.75rem',
+                  borderRadius: '9999px',
+                  fontSize: '0.85rem',
+                  fontWeight: 'bold',
+                }}
+              >
+                ✓ Connected
+              </span>
+            </div>
+          </div>
+          <div>
+            <button
+              onClick={() => window.open('https://calendar.google.com', '_blank')}
+              style={{
+                padding: '0.5rem 1rem',
+                background: '#475569',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '0.9rem',
+              }}
+            >
+              Open Google Calendar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

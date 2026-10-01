@@ -148,8 +148,11 @@ export async function testGoogleConnection(userId) {
   }
 }
 
+export const getGoogleClient = getAuthenticatedGoogleClient;
+
 export const googleClientFactory = {
   getAuthenticatedGoogleClient,
+  getGoogleClient,
   testGoogleConnection,
   markReauthorizationRequired,
 };

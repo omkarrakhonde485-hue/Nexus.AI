@@ -34,4 +34,17 @@ router.get('/test', requireAuth, googleIntegrationController.testGoogleConnectio
  */
 router.post('/disconnect', requireAuth, googleIntegrationController.disconnectGoogle);
 
+// Google Drive Routes
+router.get('/drive/workspace', requireAuth, googleIntegrationController.getDriveWorkspace);
+router.post('/drive/workspace', requireAuth, googleIntegrationController.createDriveWorkspace);
+router.get('/drive/files', requireAuth, googleIntegrationController.searchDriveFiles);
+router.get('/drive/files/:fileId', requireAuth, googleIntegrationController.getDriveFile);
+router.post('/drive/documents', requireAuth, googleIntegrationController.createDriveDocument);
+
+// Google Calendar Routes
+router.get('/calendar/events', requireAuth, googleIntegrationController.getCalendarEvents);
+router.get('/calendar/events/:eventId', requireAuth, googleIntegrationController.getCalendarEvent);
+router.get('/calendar/availability', requireAuth, googleIntegrationController.getCalendarAvailability);
+router.post('/calendar/events', requireAuth, googleIntegrationController.createCalendarEvent);
+
 export default router;
